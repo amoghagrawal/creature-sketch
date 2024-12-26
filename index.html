@@ -1,0 +1,474 @@
+<html><head><base href=".">
+  <meta charset="utf-8">
+  <title>Creature Sketch</title>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
+  <style>
+      @font-face {
+          font-family: 'Aeonik';
+          src: url('fonts/Aeonik - Light.otf') format('opentype');
+          font-weight: 300;
+          font-style: normal;
+      }
+
+      @font-face {
+          font-family: 'Aeonik';
+          src: url('fonts/Aeonik - Regular.otf') format('opentype');
+          font-weight: 400;
+          font-style: normal;
+      }
+
+      @font-face {
+          font-family: 'Aeonik';
+          src: url('fonts/Aeonik - Bold.otf') format('opentype');
+          font-weight: 700;
+          font-style: normal;
+      }
+
+      :root {
+          --primary-animal: #BB86FC;
+          --secondary-animal: #3700B3; 
+          --background-animal: #121212;
+          --primary-insect: #ff7597;
+          --secondary-insect: #ff7597;
+          --background-insect: #121212;
+      }
+
+      body {
+          font-family: 'Aeonik', sans-serif;
+          font-weight: 400;
+          background: var(--background-animal);
+          color: #FFFFFF;
+          margin: 0;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          position: relative;
+      }
+
+      .container {
+          max-width: 800px;
+          width: 90%;
+          padding: 2rem;
+          text-align: center;
+          margin: 0 auto;
+      }
+
+      .input-section {
+          width: 100%;
+          box-sizing: border-box;
+          background: rgba(187, 134, 252, 0.05);
+          padding: 2rem;
+          border-radius: 15px;
+          margin: 2rem 0;
+      }
+
+      textarea {
+          width: 100%;
+          box-sizing: border-box;
+          padding: 1rem;
+          border-radius: 8px;
+          background: rgba(187, 134, 252, 0.05);
+          border: 1px solid rgba(187, 134, 252, 0.2);
+          color: #fff;
+          font-size: 1rem;
+          margin-bottom: 1.5rem;
+          resize: vertical;
+          min-height: 120px;
+          font-family: 'Aeonik', sans-serif;
+          font-weight: 400;
+      }
+
+      .search-box {
+          width: 100%;
+          box-sizing: border-box;
+          padding: 1rem;
+          margin: 1.5rem 0;
+          border-radius: 8px;
+          background: rgba(187, 134, 252, 0.05);
+          border: 1px solid rgba(187, 134, 252, 0.2);
+          color: #fff;
+          font-size: 1rem;
+          font-family: 'Aeonik', sans-serif;
+          font-weight: 400;
+      }
+
+      .saved-creatures {
+          width: 100%;
+          box-sizing: border-box;
+          background: rgba(187, 134, 252, 0.05);
+          padding: 2rem;
+          border-radius: 15px;
+          margin: 2rem 0;
+      }
+
+      .saved-creatures h3 {
+          margin: 1rem 0 0.5rem 0; 
+          font-size: 1.5rem; 
+          font-weight: 700;
+      }
+
+      .saved-creatures p {
+          margin-top: 0.25rem; 
+          font-size: 1rem; 
+      }
+
+      button {
+          background: var(--primary-animal);
+          color: white;
+          border: none;
+          padding: 1rem 2rem;
+          border-radius: 25px;
+          font-size: 1.1rem;
+          cursor: pointer;
+          transition: all 0.2s;
+          margin: 0.75rem;
+          font-family: 'Aeonik', sans-serif;
+          font-weight: 400;
+      }
+
+      .random-button {
+          background: var(--secondary-animal);
+      }
+
+      .loading {
+          display: none;
+          font-size: 1.2rem;
+          color: var(--primary-animal);
+      }
+
+      .animal-info, .insect-info {
+          width: 100%;
+          box-sizing: border-box;
+          background: rgba(255, 255, 255, 0.05);
+          padding: 2.5rem;
+          border-radius: 12px;
+          margin: 2rem 0;
+          text-align: left;
+          color: #FFFFFF;
+          line-height: 1.6;
+      }
+
+      .saved-creature-item {
+          max-width: 600px;
+          margin: 1.5rem auto;
+          text-align: left;
+          background: rgba(187, 134, 252, 0.05);
+          padding: 2rem;
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.3s;
+          border: 1px solid rgba(187, 134, 252, 0.1);
+          position: relative;
+      }
+
+      .saved-creature-item:hover {
+          background: rgba(187, 134, 252, 0.1);
+      }
+
+      .saved-creature-item .details {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.3s ease-out;
+          padding: 0;
+      }
+
+      .saved-creature-item.expanded .details {
+          max-height: 2000px;
+          padding: 1rem 0;
+          transition: max-height 0.5s ease-in;
+      }
+
+      .expand-button {
+          width: 48px;
+          height: 48px;
+          background: none;
+          border: none;
+          color: var(--primary-animal);
+          padding: 0;
+          cursor: pointer;
+          position: absolute;
+          right: 1rem;
+          top: 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.3s;
+      }
+
+      .expand-button svg {
+          width: 48px;
+          height: 48px;
+      }
+
+      .expanded .expand-button {
+          transform: rotate(180deg);
+      }
+
+      .saved-creature-item h4.creature-name {
+          margin-right: 60px;
+          text-align: left;
+      }
+
+      .saved-creature-item .header {
+          position: relative;
+          display: flex;
+          align-items: flex-start;
+      }
+
+      .toggle-switch {
+          position: relative;
+          display: inline-block;
+          width: 60px;
+          height: 34px;
+          margin: 10px;
+      }
+
+      .toggle-switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+      }
+
+      .toggle-slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: var(--primary-animal);
+          transition: .4s;
+          border-radius: 34px;
+      }
+
+      .toggle-slider:before {
+          position: absolute;
+          content: "";
+          height: 26px;
+          width: 26px;
+          left: 4px;
+          bottom: 4px;
+          background-color: white;
+          transition: .4s;
+          border-radius: 50%;
+      }
+
+      input:checked + .toggle-slider {
+          background-color: var(--primary-insect);
+      }
+
+      input:checked + .toggle-slider:before {
+          transform: translateX(26px);
+      }
+
+      .mode-label {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 1.5rem;
+          margin: 2rem 0;
+      }
+
+      .combine-checkbox {
+          position: absolute;
+          top: 10px;
+          right: 10px; 
+          transform: scale(1.5);
+      }
+
+      .combine-section {
+          margin-top: 1rem;
+          display: none;
+          text-align: center;
+      }
+
+      .selected-for-combine {
+          border: 2px solid var(--primary-animal) !important;
+          background: rgba(187, 134, 252, 0.15) !important;
+      }
+
+      .saved-creature-item .creature-name {
+          cursor: pointer;
+          padding: 0.5rem;
+          border-radius: 4px;
+          transition: background-color 0.2s;
+      }
+
+      .saved-creature-item .creature-name:hover {
+          background: rgba(187, 134, 252, 0.1);
+      }
+
+      h1, h2, h3 {
+          margin: 1rem 0;
+          letter-spacing: 0.5px;
+          font-family: 'Aeonik', sans-serif;
+          font-weight: 700;
+      }
+
+      .saved-creature-item .details {
+          padding: 0;
+          line-height: 1.6;
+      }
+
+      #description-text {
+          font-family: 'Aeonik', sans-serif;
+          font-weight: 300;
+      }
+
+      .saved-creature-item h4 {
+          font-family: 'Aeonik', sans-serif;
+          font-weight: 700;
+          margin: 0;
+      }
+
+      .animal-info p, .insect-info p, .saved-creature-item .details p {
+          font-family: 'Aeonik', sans-serif;
+          font-weight: 300;
+      }
+
+      .animal-info em, .insect-info em, .saved-creature-item em {
+          font-family: 'Aeonik', sans-serif;
+          font-weight: 300;
+          font-style: italic;
+      }
+
+      strong {
+          font-family: 'Aeonik', sans-serif;
+          font-weight: 700;
+      }
+
+      .mode-label span {
+          font-family: 'Aeonik', sans-serif;
+          font-weight: 400;
+      }
+
+      .error-message {
+          color: #ff4444;
+          padding: 1rem;
+          background: rgba(255, 68, 68, 0.1);
+          border-radius: 8px;
+          margin: 1rem 0;
+      }
+
+      .error-message small {
+          display: block;
+          margin-top: 0.5rem;
+          opacity: 0.8;
+      }
+
+      .highlight-primary {
+          color: var(--primary-animal);
+          font-weight: 700;
+      }
+
+      .highlight-secondary {
+          color: #BB86FC;
+          font-family: 'Aeonik', sans-serif;
+          font-weight: 700;
+      }
+
+      .creature-name {
+          color: var(--primary-animal);
+          font-size: 1.8rem;
+          margin-bottom: 0.5rem;
+          font-family: 'Aeonik', sans-serif;
+          font-weight: 700;
+      }
+
+      .scientific-name {
+          font-style: italic;
+          color: var(--primary-animal);
+          font-size: 1.1rem;
+          margin-bottom: 1.5rem;
+          font-family: 'Aeonik', sans-serif;
+          font-weight: 400;
+      }
+
+      .insect-mode .scientific-name {
+          color: var(--primary-insect);
+      }
+
+      .info-section {
+          margin: 1rem 0;
+          line-height: 1.8;
+      }
+
+      .info-label {
+          color: var(--primary-animal);
+          font-family: 'Aeonik', sans-serif;
+          font-weight: 700;
+          font-size: 1.1rem;
+          margin-right: 0.5rem;
+      }
+
+      .popup-notification {
+          position: fixed;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: var(--primary-animal);
+          color: white;
+          padding: 1rem 2rem;
+          border-radius: 8px;
+          font-family: 'Aeonik', sans-serif;
+          font-weight: 400;
+          z-index: 1000;
+          opacity: 0;
+          transition: opacity 0.3s ease-in-out;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .popup-notification.show {
+          opacity: 1;
+      }
+
+      .saved-creature-item.insect-mode .creature-name {
+          color: var(--primary-insect);
+      }
+
+      .saved-creature-item.insect-mode .scientific-name {
+          color: var(--primary-insect);
+      }
+  </style>
+</head>
+<body>
+  <div id="popup" class="popup-notification">
+      Creature saved successfully!
+  </div>
+  <div class="container">
+      <h1>&#x1f98a; AI Animal Creator</h1>
+      <p id="description-text">Describe the kind of animal you&apos;d like to create, and the AI will describe it in detail!</p>
+      
+      <div class="mode-label">
+          <span>&#x1f98a; Animal Mode</span>
+          <label class="toggle-switch">
+              <input type="checkbox" id="modeToggle" onchange="updateMode()">
+              <span class="toggle-slider"></span>
+          </label>
+          <span>&#x1f41e; Insect Mode</span>
+      </div>
+
+      <div class="input-section">
+          <textarea id="creatureDescription" rows="4" placeholder="Describe your dream animal... (e.g., &apos;A rainbow-colored dolphin that can sing melodious tunes&apos;)"></textarea>
+          <button id="generateButton" onclick="generateCreature()">&#x1f981; Generate Creature Description</button>
+          <button onclick="saveCreature()" class="save-button" id="saveButton" style="display: none;">&#x1f4be; Save Creature</button>
+          <div id="loading" class="loading">Imagining your creature... &#x1f981;</div>
+      </div>
+
+      <div id="creatureInfo" class="animal-info" style="display: none;"></div>
+
+      <div class="saved-creatures" id="savedCreatures">
+          <h3>Your Saved Animals</h3>
+          <p>Select two creatures to combine them into a new hybrid species!</p>
+          <input type="text" id="searchCreatures" class="search-box" placeholder="Search saved creatures...">
+          <div id="savedCreaturesList"></div>
+          <div class="combine-section" id="combineSection">
+              <button onclick="combineCreatures()" style="background: var(--primary-animal); margin: 0;">&#x1f9ec; Combine Selected Creatures</button>
+          </div>
+          <button onclick="clearSavedCreatures()" class="clear-button">&#x1f5d1; Clear All Creatures</button>
+      </div>
+  </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -51,8 +51,10 @@ export default async function handler(req, res) {
             })
         });
 
-        const responseData = await response.json();
+        const rawResponse = await response.text();
+        console.log("Raw OpenAI Response:", rawResponse);
 
+        const responseData = JSON.parse(rawResponse); 
         const data = JSON.parse(responseData.choices[0].message.content);
 
         const requiredFields = ['name', 'scientificName', 'description', 'behavior', 'abilities', 'specialProperties'];
